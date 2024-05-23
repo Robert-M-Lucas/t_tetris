@@ -1,6 +1,7 @@
 use bevy::app::{App, Plugin};
 use bevy::prelude::*;
 use bevy::ui::Display::Flex;
+use bevy::window::WindowMode;
 
 use crate::GameState;
 use crate::util::despawn_screen;

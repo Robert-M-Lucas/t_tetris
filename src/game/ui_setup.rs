@@ -9,20 +9,20 @@ pub struct Board;
 #[derive(Component)]
 pub struct SideBar;
 
-pub fn get_target_and_sidebar_width(height: f32, width: f32) -> (f32, f32) {
+pub fn get_target_and_sidebar_width(width: f32, height: f32) -> (f32, f32) {
     let target_width = height * RATIO;
     let sidebar_width = (width - target_width) / 2.0;
     (target_width, sidebar_width)
 }
 
-pub fn resize_handler(
+pub fn ui_resize_handler(
     mut resize_events: EventReader<WindowResized>,
     mut sidebars: Query<&mut Style, (With<SideBar>, Without<Board>)>,
     mut board: Query<&mut Style, (With<Board>, Without<SideBar>)>
 ) {
     let Some(e) = resize_events.read().last() else { return; };
 
-    let (target_width, sidebar_width) = get_target_and_sidebar_width(e.height, e.width);
+    let (target_width, sidebar_width) = get_target_and_sidebar_width(e.width, e.height);
 
     for mut s in sidebars.iter_mut() {
         s.width = Val::Px(sidebar_width);
@@ -34,7 +34,7 @@ pub fn resize_handler(
 pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Window>) {
     let window = window.single();
 
-    let (target_width, sidebar_width) = get_target_and_sidebar_width(window.height(), window.width());
+    let (target_width, sidebar_width) = get_target_and_sidebar_width(window.width(), window.height());
 
     // root node
     commands

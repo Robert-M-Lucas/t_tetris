@@ -6,7 +6,7 @@ mod loading;
 
 use bevy::log::LogPlugin;
 use bevy::prelude::*;
-use bevy::window::PresentMode;
+use bevy::window::{PresentMode, WindowMode};
 use bevy_dev_console::DevConsolePlugin;
 use bevy_dev_console::prelude::ConsoleLogPlugin;
 use crate::custom_functions::dev_console_environment;
@@ -58,7 +58,20 @@ fn main() {
     ))
         .insert_resource(ClearColor(Color::WHITE))
         .init_state::<GameState>()
+        .add_systems(Update, fullscreen)
         .add_plugins((LoadingPlugin, MenuPlugin, GamePlugin))
         .run();
 }
 
+fn fullscreen(keyboard_input: Res<ButtonInput<KeyCode>>, mut window: Query<&mut Window>) {
+    if keyboard_input.just_pressed(KeyCode::F11) {
+        let mut window = window.single_mut();
+        match &window.mode {
+            WindowMode::Fullscreen => {
+                window.mode = WindowMode::Windowed;
+                window.resolution = default();
+            },
+            _ => window.mode = WindowMode::Fullscreen,
+        };
+    }
+}
