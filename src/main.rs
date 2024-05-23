@@ -28,7 +28,6 @@ fn main() {
             title: "Window Title".to_string(),
             present_mode: PresentMode::Immediate,
             resolution: default(),
-
             ..default()
         }),
         ..default()

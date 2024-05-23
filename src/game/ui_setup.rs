@@ -66,6 +66,8 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
                         .spawn(NodeBundle {
                             style: Style {
                                 width: Val::Percent(100.),
+                                align_items: AlignItems::Center,
+                                justify_content: JustifyContent::Center,
                                 ..default()
                             },
                             ..default()
@@ -117,7 +119,6 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
                                     TextStyle {
                                         font: font.get(),
                                         font_size: 30.0,
-                                        color: Color::BLACK,
                                         ..default()
                                     },
                                 ),
@@ -146,6 +147,8 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
                         .spawn(NodeBundle {
                             style: Style {
                                 width: Val::Percent(100.),
+                                align_items: AlignItems::Center,
+                                justify_content: JustifyContent::Center,
                                 ..default()
                             },
                             ..default()
