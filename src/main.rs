@@ -25,7 +25,7 @@ pub enum GameState {
 fn main() {
     let default_plugins = DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
-            title: "Window Title".to_string(),
+            title: "Tetris".to_string(),
             present_mode: PresentMode::Immediate,
             resolution: default(),
             ..default()
