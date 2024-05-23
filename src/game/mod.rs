@@ -11,6 +11,7 @@ use crate::util::despawn_screen;
 mod ui_setup;
 mod tetris_board;
 mod tetris_logic;
+mod shapes;
 
 pub const BOARD_WIDTH: usize = 10;
 pub const BOARD_HEIGHT: usize = 24;
