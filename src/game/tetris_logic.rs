@@ -48,6 +48,7 @@ impl Tetrominos {
 #[derive(Resource)]
 pub struct Ticker {
     last: f32,
+    save_point: f32,
     interval: f32
 }
 
@@ -55,6 +56,7 @@ impl Ticker {
     pub fn new(time: &Time, interval: f32) -> Ticker {
         Ticker {
             last: time.elapsed_seconds(),
+            save_point: 0.0,
             interval
         }
     }
@@ -66,6 +68,26 @@ impl Ticker {
 
         ticks
     }
+
+    pub fn set_interval(&mut self, interval: f32) {
+        self.interval = interval;
+    }
+
+    pub fn pause(&mut self, time: &Time) {
+        self.save_point = time.elapsed_seconds();
+    }
+
+    pub fn resume(&mut self, time: &Time) {
+        self.last = time.elapsed_seconds() - (self.save_point - self.last);
+    }
+}
+
+pub fn ticker_pause(mut ticker: ResMut<Ticker>, time: Res<Time>) {
+    ticker.pause(&time);
+}
+
+pub fn ticker_resume(mut ticker: ResMut<Ticker>, time: Res<Time>) {
+    ticker.resume(&time);
 }
 
 #[derive(Resource)]
