@@ -1,0 +1,6 @@
+Instructions:
+    - Move left/right : ← / →
+    - Move down (step) : ↓
+    - Move down (jump) : ↑
+    - Rotate anticlockwise/clockwise : Q / E
+    - Pause/Play : Esc

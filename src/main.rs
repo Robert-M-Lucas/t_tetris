@@ -19,7 +19,8 @@ pub enum GameState {
     #[default]
     Loading,
     Menu,
-    Game
+    Game,
+    ReloadGame
 }
 
 fn main() {

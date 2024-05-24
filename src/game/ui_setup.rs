@@ -15,6 +15,9 @@ pub struct ScoreLabel;
 #[derive(Component)]
 pub struct DifficultyLabel;
 
+#[derive(Component)]
+pub struct InfoLabel;
+
 pub fn get_target_and_sidebar_width(width: f32, height: f32) -> (f32, f32) {
     let target_width = height * RATIO;
     let sidebar_width = (width - target_width) / 2.0;
@@ -74,6 +77,7 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
                                 width: Val::Percent(100.),
                                 align_items: AlignItems::Center,
                                 justify_content: JustifyContent::Center,
+                                flex_direction: FlexDirection::Column,
                                 ..default()
                             },
                             ..default()
@@ -93,6 +97,25 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
                                 // not button/list item text, this is necessary
                                 // for accessibility to treat the text accordingly.
                                 Label, ScoreLabel
+                            ));
+
+                            parent.spawn((
+                                TextBundle::from_section(
+                                    "Difficulty: 1",
+                                    TextStyle {
+                                        font: font.get(),
+                                        font_size: 30.0,
+                                        ..default()
+                                    },
+                                )
+                                    .with_style(Style {
+                                        margin: UiRect::all(Val::Px(5.)),
+                                        ..default()
+                                    }),
+                                // Because this is a distinct label widget and
+                                // not button/list item text, this is necessary
+                                // for accessibility to treat the text accordingly.
+                                Label, DifficultyLabel
                             ));
                         });
                 });
@@ -119,20 +142,20 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
                         })
                         .with_children(|parent| {
                             // text
-                            parent.spawn((
-                                TextBundle::from_section(
-                                    "Centre",
-                                    TextStyle {
-                                        font: font.get(),
-                                        font_size: 30.0,
-                                        ..default()
-                                    },
-                                ),
-                                // Because this is a distinct label widget and
-                                // not button/list item text, this is necessary
-                                // for accessibility to treat the text accordingly.
-                                Label,
-                            ));
+                            // parent.spawn((
+                            //     TextBundle::from_section(
+                            //         "Centre",
+                            //         TextStyle {
+                            //             font: font.get(),
+                            //             font_size: 30.0,
+                            //             ..default()
+                            //         },
+                            //     ),
+                            //     // Because this is a distinct label widget and
+                            //     // not button/list item text, this is necessary
+                            //     // for accessibility to treat the text accordingly.
+                            //     Label,
+                            // ));
                         });
                 });
 
@@ -155,6 +178,7 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
                                 width: Val::Percent(100.),
                                 align_items: AlignItems::Center,
                                 justify_content: JustifyContent::Center,
+                                flex_direction: FlexDirection::Column,
                                 ..default()
                             },
                             ..default()
@@ -163,7 +187,26 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
                             // text
                             parent.spawn((
                                 TextBundle::from_section(
-                                    "Difficulty: 1",
+                                    "Playing",
+                                    TextStyle {
+                                        font: font.get(),
+                                        font_size: 30.0,
+                                        ..default()
+                                    },
+                                )
+                                    .with_style(Style {
+                                        margin: UiRect::all(Val::Px(20.)),
+                                        ..default()
+                                    }),
+                                // Because this is a distinct label widget and
+                                // not button/list item text, this is necessary
+                                // for accessibility to treat the text accordingly.
+                                Label, InfoLabel
+                            ));
+
+                            parent.spawn((
+                                TextBundle::from_section(
+                                    include_str!("instructions.txt"),
                                     TextStyle {
                                         font: font.get(),
                                         font_size: 30.0,
@@ -177,7 +220,7 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
                                 // Because this is a distinct label widget and
                                 // not button/list item text, this is necessary
                                 // for accessibility to treat the text accordingly.
-                                Label, DifficultyLabel
+                                Label
                             ));
                         });
                 });

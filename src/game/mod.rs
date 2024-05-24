@@ -63,12 +63,18 @@ impl Plugin for GamePlugin {
             .init_state::<Score>()
             .add_systems(
                 OnEnter(GameState::Game),
-                (ui_setup, tetris_board::tetris_board_setup, tetris_logic::tetris_logic_setup)
+                (ui_setup, tetris_board::tetris_board_setup, tetris_logic::tetris_logic_setup, game_setup)
             )
             .add_systems(
                 Update,
                 (ui_resize_handler, tetris_board::cell_resize_handler, pause, update_labels)
                     .run_if(in_state(GameState::Game))
+            )
+            .add_systems(
+                Update,
+                (pause_menu)
+                    .run_if(in_state(GameState::Game))
+                    .run_if(in_state(InGameState::Paused))
             )
             .add_systems(
                 Update,
@@ -89,8 +95,16 @@ impl Plugin for GamePlugin {
             .add_systems(
                 OnExit(GameState::Game),
                 (despawn_screen::<OnGameScreen>, tetris_board::tetris_board_shutdown, tetris_logic::tetris_logic_shutdown)
+            )
+            .add_systems(
+                OnEnter(GameState::ReloadGame),
+                (reload_game)
             );
     }
+}
+
+fn reload_game(mut game_state: ResMut<NextState<GameState>>) {
+    game_state.set(GameState::Game);
 }
 
 fn pause(keyboard_input: Res<ButtonInput<KeyCode>>, game_over: Res<State<GameOver>>, state: Res<State<InGameState>>, mut next_state: ResMut<NextState<InGameState>>) {
@@ -114,6 +128,18 @@ fn game_setup(
     game_over_state.set(GameOver::default());
     difficulty_state.set(Difficulty::default());
     score_state.set(Score::default());
+}
+
+fn pause_menu(
+    keyboard: Res<ButtonInput<KeyCode>>,
+    mut game_state: ResMut<NextState<GameState>>,
+) {
+    if keyboard.pressed(KeyCode::Enter) {
+        game_state.set(GameState::Menu);
+    }
+    else if keyboard.pressed(KeyCode::KeyR) {
+        game_state.set(GameState::ReloadGame);
+    }
 }
 
 /*fn test_system(

@@ -49,15 +49,15 @@ impl Tetrominos {
 #[derive(Resource)]
 pub struct Ticker {
     last: f32,
-    save_point: f32,
-    interval: f32
+    save_point: Option<f32>,
+    interval: f32,
 }
 
 impl Ticker {
     pub fn new(time: &Time, interval: f32) -> Ticker {
         Ticker {
             last: time.elapsed_seconds(),
-            save_point: 0.0,
+            save_point: None,
             interval
         }
     }
@@ -75,11 +75,13 @@ impl Ticker {
     }
 
     pub fn pause(&mut self, time: &Time) {
-        self.save_point = time.elapsed_seconds();
+        self.save_point = Some(time.elapsed_seconds());
     }
 
     pub fn resume(&mut self, time: &Time) {
-        self.last = time.elapsed_seconds() - (self.save_point - self.last);
+        if let Some(save_point) = self.save_point {
+            self.last = time.elapsed_seconds() - (save_point - self.last);
+        }
     }
 }
 
@@ -149,27 +151,30 @@ impl TetrisLogic {
         in_game_state: &mut NextState<InGameState>,
         game_over_state: &mut NextState<GameOver>
     ) {
-        if self.current_shape.is_some() {
-            if !self.down(board, materials) {
-                let clears = self.check_clear(board, materials);
-                let score_a = if clears == 0 {
-                    0
-                } else {
-                    100 * 2usize.pow(clears - 1)
-                };
-
-                self.score += score_a;
-                score.set(Score { score: self.score });
-
-                self.difficulty += clears as usize;
-                difficulty.set(Difficulty { difficulty: self.difficulty });
-
-                ticker.set_interval(self.get_interval());
-
-                self.current_shape = None;
+        if self.current_shape.is_none() {
+            if !self.spawn(board, materials) {
+                in_game_state.set(InGameState::Paused);
+                game_over_state.set(GameOver::GameOver);
             }
         }
-        else {
+        else if !self.down(board, materials) {
+            let clears = self.check_clear(board, materials);
+            let score_a = if clears == 0 {
+                0
+            } else {
+                100 * 2usize.pow(clears - 1)
+            };
+
+            self.score += score_a;
+            score.set(Score { score: self.score });
+
+            self.difficulty += clears as usize;
+            difficulty.set(Difficulty { difficulty: self.difficulty });
+
+            ticker.set_interval(self.get_interval());
+
+            self.current_shape = None;
+
             if !self.spawn(board, materials) {
                 in_game_state.set(InGameState::Paused);
                 game_over_state.set(GameOver::GameOver);
@@ -412,5 +417,5 @@ pub fn tetris_logic_update(
 
 pub fn tetris_logic_shutdown(mut commands: Commands) {
     commands.remove_resource::<TetrisLogic>();
-    commands.remove_resource::<Ticker>()
+    commands.remove_resource::<Ticker>();
 }
