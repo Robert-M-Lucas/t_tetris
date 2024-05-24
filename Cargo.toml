@@ -9,6 +9,7 @@ bevy-inspector-egui = "0.24.0"
 bevy_dev_console = { git = "https://github.com/doonv/bevy_dev_console.git", version = "0.1.0" }
 rand = "0.8.5"
 rand_derive2 = "0.1.21"
+log = "0.4.21"
 
 [profile.dev]
 opt-level = 0

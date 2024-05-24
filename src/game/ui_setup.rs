@@ -9,6 +9,12 @@ pub struct Board;
 #[derive(Component)]
 pub struct SideBar;
 
+#[derive(Component)]
+pub struct ScoreLabel;
+
+#[derive(Component)]
+pub struct DifficultyLabel;
+
 pub fn get_target_and_sidebar_width(width: f32, height: f32) -> (f32, f32) {
     let target_width = height * RATIO;
     let sidebar_width = (width - target_width) / 2.0;
@@ -76,7 +82,7 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
                             // text
                             parent.spawn((
                                 TextBundle::from_section(
-                                    "Left Side",
+                                    "Score: 0",
                                     TextStyle {
                                         font: font.get(),
                                         font_size: 30.0,
@@ -86,7 +92,7 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
                                 // Because this is a distinct label widget and
                                 // not button/list item text, this is necessary
                                 // for accessibility to treat the text accordingly.
-                                Label,
+                                Label, ScoreLabel
                             ));
                         });
                 });
@@ -157,7 +163,7 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
                             // text
                             parent.spawn((
                                 TextBundle::from_section(
-                                    "Right Side",
+                                    "Difficulty: 1",
                                     TextStyle {
                                         font: font.get(),
                                         font_size: 30.0,
@@ -171,7 +177,7 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
                                 // Because this is a distinct label widget and
                                 // not button/list item text, this is necessary
                                 // for accessibility to treat the text accordingly.
-                                Label,
+                                Label, DifficultyLabel
                             ));
                         });
                 });

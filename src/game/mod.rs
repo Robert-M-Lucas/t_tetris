@@ -5,6 +5,7 @@ use bevy::window::WindowMode;
 use rand::random;
 use tetris_board::{Colors, TetrisBoard};
 use crate::game::tetris_logic::{ticker_pause, ticker_resume};
+use crate::game::ui::update_labels;
 
 use crate::game::ui_setup::{ui_resize_handler, ui_setup};
 use crate::GameState;
@@ -14,6 +15,7 @@ mod ui_setup;
 mod tetris_board;
 mod tetris_logic;
 mod shapes;
+mod ui;
 
 pub const BOARD_WIDTH: usize = 10;
 pub const BOARD_HEIGHT: usize = 24;
@@ -34,17 +36,38 @@ pub enum InGameState {
     Paused
 }
 
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+pub enum GameOver {
+    #[default]
+    NotOver,
+    GameOver
+}
+
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+pub struct Difficulty {
+    pub difficulty: usize
+}
+
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+pub struct Score {
+    pub score: usize
+}
+
+
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app
             .init_state::<InGameState>()
+            .init_state::<GameOver>()
+            .init_state::<Difficulty>()
+            .init_state::<Score>()
             .add_systems(
                 OnEnter(GameState::Game),
                 (ui_setup, tetris_board::tetris_board_setup, tetris_logic::tetris_logic_setup)
             )
             .add_systems(
                 Update,
-                (ui_resize_handler, tetris_board::cell_resize_handler, pause)
+                (ui_resize_handler, tetris_board::cell_resize_handler, pause, update_labels)
                     .run_if(in_state(GameState::Game))
             )
             .add_systems(
@@ -70,7 +93,9 @@ impl Plugin for GamePlugin {
     }
 }
 
-fn pause(keyboard_input: Res<ButtonInput<KeyCode>>, state: Res<State<InGameState>>, mut next_state: ResMut<NextState<InGameState>>) {
+fn pause(keyboard_input: Res<ButtonInput<KeyCode>>, game_over: Res<State<GameOver>>, state: Res<State<InGameState>>, mut next_state: ResMut<NextState<InGameState>>) {
+    if matches!(game_over.as_ref().get(), GameOver::GameOver) { return; }
+
     if keyboard_input.just_pressed(KeyCode::Escape) {
         match state.get() {
             InGameState::UnPaused => next_state.set(InGameState::Paused),
@@ -79,8 +104,16 @@ fn pause(keyboard_input: Res<ButtonInput<KeyCode>>, state: Res<State<InGameState
     }
 }
 
-fn game_setup(mut in_game_state: ResMut<NextState<InGameState>>) {
-    in_game_state.set(InGameState::UnPaused);
+fn game_setup(
+    mut in_game_state: ResMut<NextState<InGameState>>,
+    mut game_over_state: ResMut<NextState<GameOver>>,
+    mut difficulty_state: ResMut<NextState<Difficulty>>,
+    mut score_state: ResMut<NextState<Score>>,
+) {
+    in_game_state.set(InGameState::default());
+    game_over_state.set(GameOver::default());
+    difficulty_state.set(Difficulty::default());
+    score_state.set(Score::default());
 }
 
 /*fn test_system(

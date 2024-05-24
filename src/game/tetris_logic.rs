@@ -4,7 +4,8 @@ use bevy::input::ButtonInput;
 use bevy::prelude::*;
 use rand::random;
 use rand_derive2::RandGen;
-use crate::game::{BOARD_HEIGHT, BOARD_WIDTH};
+use log::log;
+use crate::game::{BOARD_HEIGHT, BOARD_WIDTH, Difficulty, GameOver, InGameState, Score};
 use crate::game::shapes::{BACK_L_SHAPE, BACK_Z_SHAPE, L_SHAPE, LINE, SQUARE, T_SHAPE, Z_SHAPE};
 use crate::game::tetris_board::{Colors, TetrisBoard};
 
@@ -96,7 +97,9 @@ pub struct TetrisLogic {
     y: i32,
     rot: usize,
     current_shape: Option<Tetrominos>,
-    current_color: Colors
+    current_color: Colors,
+    difficulty: usize,
+    score: usize
 }
 
 
@@ -107,7 +110,9 @@ impl TetrisLogic {
             y: 0,
             rot: 0,
             current_shape: None,
-            current_color: Colors::Red
+            current_color: Colors::Red,
+            difficulty: 0,
+            score: 0
         }
     }
 
@@ -134,20 +139,46 @@ impl TetrisLogic {
         }
     }
 
-    pub fn tick(&mut self, board: &mut TetrisBoard, materials: &mut Assets<ColorMaterial>) {
+    pub fn tick(
+        &mut self,
+        board: &mut TetrisBoard,
+        materials: &mut Assets<ColorMaterial>,
+        difficulty: &mut NextState<Difficulty>,
+        score: &mut NextState<Score>,
+        ticker: &mut Ticker,
+        in_game_state: &mut NextState<InGameState>,
+        game_over_state: &mut NextState<GameOver>
+    ) {
         if self.current_shape.is_some() {
             if !self.down(board, materials) {
-                self.check_clear(board, materials);
+                let clears = self.check_clear(board, materials);
+                let score_a = if clears == 0 {
+                    0
+                } else {
+                    100 * 2usize.pow(clears - 1)
+                };
+
+                self.score += score_a;
+                score.set(Score { score: self.score });
+
+                self.difficulty += clears as usize;
+                difficulty.set(Difficulty { difficulty: self.difficulty });
+
+                ticker.set_interval(self.get_interval());
+
                 self.current_shape = None;
             }
         }
         else {
-            self.spawn(board, materials);
+            if !self.spawn(board, materials) {
+                in_game_state.set(InGameState::Paused);
+                game_over_state.set(GameOver::GameOver);
+            }
         }
     }
 
     //noinspection ALL
-    fn check_clear(&mut self, board: &mut TetrisBoard, materials: &mut Assets<ColorMaterial>) {
+    fn check_clear(&mut self, board: &mut TetrisBoard, materials: &mut Assets<ColorMaterial>) -> u32 {
         let c_board = board.board();
         let mut found = None;
 
@@ -171,15 +202,23 @@ impl TetrisLogic {
                     }
                 }
 
-                self.check_clear(board, materials);
+                1 + self.check_clear(board, materials)
             }
+            else {
+                1
+            }
+        }
+        else {
+            0
         }
     }
 
-    fn spawn(&mut self, board: &mut TetrisBoard, materials: &mut Assets<ColorMaterial>) {
+    fn get_interval(&self) -> f32 {
+        1.0 / ((self.difficulty as f32 / 10.0) + 2.0)
+    }
+    fn spawn(&mut self, board: &mut TetrisBoard, materials: &mut Assets<ColorMaterial>) -> bool {
         if self.current_shape.is_some() {
-            warn!("Tried to spawn tetromino while one is in play!");
-            return;
+            panic!("Tried to spawn tetromino while one is in play!");
         }
 
         self.current_shape = Some(random());
@@ -188,7 +227,13 @@ impl TetrisLogic {
         self.y = (BOARD_HEIGHT - 1) as i32;
         self.rot = 0;
 
+        if !self.test(board) {
+            return false;
+        }
+
         self.draw(board, materials);
+
+        true
     }
 
     fn draw(&mut self, board: &mut TetrisBoard, materials: &mut Assets<ColorMaterial>) {
@@ -338,25 +383,28 @@ impl TetrisLogic {
         self.draw(board, materials);
         res
     }
-
-
 }
 
 pub fn tetris_logic_setup(mut commands: Commands, time: Res<Time>) {
-    commands.insert_resource(TetrisLogic::new());
-    commands.insert_resource(Ticker::new(&time, 1.0 / 2.0));
+    let logic = TetrisLogic::new();
+    commands.insert_resource(Ticker::new(&time, logic.get_interval()));
+    commands.insert_resource(logic);
 }
 
 pub fn tetris_logic_update(
+    mut difficulty: ResMut<NextState<Difficulty>>,
+    mut score: ResMut<NextState<Score>>,
     mut logic: ResMut<TetrisLogic>,
     mut board: ResMut<TetrisBoard>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut ticker: ResMut<Ticker>,
+    mut game_over_state: ResMut<NextState<GameOver>>,
+    mut in_game_state: ResMut<NextState<InGameState>>,
     time: Res<Time>
 ) {
     for _ in 0..ticker.as_mut().ticks(&time) {
-        logic.as_mut().tick(&mut board, &mut materials);
+        logic.as_mut().tick(&mut board, &mut materials, &mut difficulty, &mut score, &mut ticker, &mut in_game_state, &mut game_over_state);
     }
 
     logic.as_mut().update(board.as_mut(), &keyboard, materials.as_mut());
