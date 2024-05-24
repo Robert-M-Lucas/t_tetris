@@ -2,6 +2,7 @@ use std::cmp::{max, min};
 use bevy::asset::Assets;
 use bevy::input::ButtonInput;
 use bevy::prelude::*;
+use bevy_dev_console::ui::ConsoleUiState;
 use rand::random;
 use rand_derive2::RandGen;
 use log::log;
@@ -406,12 +407,20 @@ pub fn tetris_logic_update(
     mut ticker: ResMut<Ticker>,
     mut game_over_state: ResMut<NextState<GameOver>>,
     mut in_game_state: ResMut<NextState<InGameState>>,
-    time: Res<Time>
+    time: Res<Time>,
+    #[cfg(debug_assertions)]
+    console: Res<ConsoleUiState>
 ) {
     for _ in 0..ticker.as_mut().ticks(&time) {
         logic.as_mut().tick(&mut board, &mut materials, &mut difficulty, &mut score, &mut ticker, &mut in_game_state, &mut game_over_state);
     }
 
+    #[cfg(debug_assertions)]
+    if !console.open() {
+        logic.as_mut().update(board.as_mut(), &keyboard, materials.as_mut());
+    }
+
+    #[cfg(not(debug_assertions))]
     logic.as_mut().update(board.as_mut(), &keyboard, materials.as_mut());
 }
 
