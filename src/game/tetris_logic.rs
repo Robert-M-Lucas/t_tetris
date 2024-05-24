@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use rand::random;
 use rand_derive2::RandGen;
 use crate::game::{BOARD_HEIGHT, BOARD_WIDTH};
-use crate::game::shapes::{BACK_L_SHAPE, BACK_Z_SHAPE, L_SHAPE, LINE, SQUARE, Z_SHAPE};
+use crate::game::shapes::{BACK_L_SHAPE, BACK_Z_SHAPE, L_SHAPE, LINE, SQUARE, T_SHAPE, Z_SHAPE};
 use crate::game::tetris_board::{Colors, TetrisBoard};
 
 #[derive(Debug, RandGen)]
@@ -15,7 +15,8 @@ enum Tetrominos {
     Line,
     Square,
     ZShape,
-    BackZShape
+    BackZShape,
+    TShape
 }
 
 impl Tetrominos {
@@ -26,7 +27,20 @@ impl Tetrominos {
             Tetrominos::Line => &LINE,
             Tetrominos::Square => &SQUARE,
             Tetrominos::ZShape => &Z_SHAPE,
-            Tetrominos::BackZShape => &BACK_Z_SHAPE
+            Tetrominos::BackZShape => &BACK_Z_SHAPE,
+            Tetrominos::TShape => &T_SHAPE,
+        }
+    }
+
+    pub fn get_color(&self) -> Colors {
+        match &self {
+            Tetrominos::LShape => Colors::Orange,
+            Tetrominos::BackLShape => Colors::Blue,
+            Tetrominos::Line => Colors::LightBlue,
+            Tetrominos::Square => Colors::Yellow,
+            Tetrominos::ZShape => Colors::Red,
+            Tetrominos::BackZShape => Colors::Lime,
+            Tetrominos::TShape => Colors::Purple,
         }
     }
 }
@@ -147,7 +161,7 @@ impl TetrisLogic {
         }
 
         self.current_shape = Some(random());
-        self.current_color = Colors::random_not_empty();
+        self.current_color = self.current_shape.as_ref().unwrap().get_color();
         self.x = ((BOARD_WIDTH / 2) - (4 / 2) )as i32;
         self.y = (BOARD_HEIGHT - 1) as i32;
         self.rot = 0;

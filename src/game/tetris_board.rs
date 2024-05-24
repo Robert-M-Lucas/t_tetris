@@ -56,29 +56,37 @@ fn get_cell_pos(cell_width: f32, x: usize, y: usize) -> Vec2 {
 #[derive(Copy, Clone)]
 pub enum Colors {
     Empty,
-    Red,
-    Green,
+    LightBlue,
     Blue,
+    Orange,
+    Yellow,
+    Lime,
+    Purple,
+    Red
 }
 
-impl Colors {
-    pub fn random_not_empty() -> Colors {
-        match thread_rng().gen_range(0..3) {
-            0 => Colors::Red,
-            1 => Colors::Green,
-            2 => Colors::Blue,
-            _ => unreachable!()
-        }
-    }
-}
+// impl Colors {
+//     pub fn random_not_empty() -> Colors {
+//         match thread_rng().gen_range(0..3) {
+//             0 => Colors::Red,
+//             1 => Colors::Lime,
+//             2 => Colors::Blue,
+//             _ => unreachable!()
+//         }
+//     }
+// }
 
 impl Colors {
     fn get_color(&self) -> Color {
         match &self {
             Colors::Empty => Color::BLACK,
             Colors::Red => Color::RED,
-            Colors::Green => Color::GREEN,
-            Colors::Blue => Color::BLUE
+            Colors::Lime => Color::LIME_GREEN,
+            Colors::Blue => Color::BLUE,
+            Colors::LightBlue => Color::TEAL,
+            Colors::Orange => Color::ORANGE,
+            Colors::Yellow => Color::YELLOW,
+            Colors::Purple => Color::PURPLE
         }
     }
 }
