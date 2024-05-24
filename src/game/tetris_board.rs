@@ -4,6 +4,8 @@ use bevy::window::WindowResized;
 use bevy::math::Vec2;
 use std::array;
 use bevy::sprite::MaterialMesh2dBundle;
+use rand::{Rng, thread_rng};
+use rand_derive2::RandGen;
 use crate::game::{BOARD_HEIGHT, BOARD_HEIGHT_F, BOARD_WIDTH, BOARD_WIDTH_F, OnGameScreen};
 use crate::game::ui_setup::get_target_and_sidebar_width;
 
@@ -57,6 +59,17 @@ pub enum Colors {
     Red,
     Green,
     Blue,
+}
+
+impl Colors {
+    pub fn random_not_empty() -> Colors {
+        match thread_rng().gen_range(0..3) {
+            0 => Colors::Red,
+            1 => Colors::Green,
+            2 => Colors::Blue,
+            _ => unreachable!()
+        }
+    }
 }
 
 impl Colors {
