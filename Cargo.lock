@@ -527,7 +527,7 @@ dependencies = [
 [[package]]
 name = "bevy_dev_console"
 version = "0.1.0"
-source = "git+https://github.com/robert-M-Lucas/bevy_dev_console.git#fb8bab05232717cbc280e5c779e724dacd2d4d11"
+source = "git+https://github.com/doonv/bevy_dev_console.git#3814f05f44512153236610178c681c0433475008"
 dependencies = [
  "android_log-sys",
  "bevy",
