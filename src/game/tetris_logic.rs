@@ -275,10 +275,17 @@ impl TetrisLogic {
 
         let res = self.test(board);
         if !res {
-            self.rot = match self.rot {
-                0 => 3,
-                r => r - 1,
-            };
+            self.x += 1;
+            if !self.test(board) {
+                self.x -= 2;
+                if !self.test(board) {
+                    self.x += 1;
+                    self.rot = match self.rot {
+                        0 => 3,
+                        r => r - 1,
+                    };
+                }
+            }
         }
 
         self.draw(board, materials);
@@ -294,7 +301,16 @@ impl TetrisLogic {
 
         let res = self.test(board);
         if !res {
-            self.rot = (self.rot + 1) % 4;
+            if !res {
+                self.x += 1;
+                if !self.test(board) {
+                    self.x -= 2;
+                    if !self.test(board) {
+                        self.x += 1;
+                        self.rot = (self.rot + 1) % 4;
+                    }
+                }
+            }
         }
 
         self.draw(board, materials);
