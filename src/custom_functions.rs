@@ -1,6 +1,8 @@
 //! A simple example
 
 
+use std::time::Duration;
+use bevy::ecs::system::RunSystemOnce;
 use bevy::prelude::*;
 use bevy_dev_console::builtin_parser::Environment;
 use bevy_dev_console::register;
@@ -10,13 +12,62 @@ fn echo(string: String) {
 }
 
 
-// Register our functions by creating and inserting our own environment
-pub fn dev_console_environment() -> Environment {
+fn fps(world: &mut World) {
+    world.run_system_once(|time: Res<Time>| {
+        info!("Frametime: {:?} [{} fps]", time.delta(), 1.0 / time.delta_seconds());
+    });
+}
+
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+enum CountingFrames {
+    #[default]
+    NotCounting,
+    Counting,
+}
+
+#[derive(Resource, Default)]
+struct FrameCount {
+    pub end: f32,
+    pub count: usize,
+    pub worst: f32,
+}
+
+fn fps_avg(world: &mut World) {
+    info!("Starting fps profiling");
+    world.run_system_once(|mut is_counting: ResMut<NextState<CountingFrames>>, mut count: ResMut<FrameCount>, time: Res<Time>| {
+        is_counting.set(CountingFrames::Counting);
+        count.count = 1;
+        count.end = time.elapsed_seconds() + 10.0;
+        count.worst = f32::INFINITY;
+    });
+}
+
+fn count_frames(mut count: ResMut<FrameCount>, mut is_counting: ResMut<NextState<CountingFrames>>, time: Res<Time>) {
+    if time.elapsed_seconds() > count.end {
+        let fps = count.count as f32 / 10.0;
+        info!("Avg FPS (10 seconds): {} | Worst frametime: {} [{} fps]", fps, count.worst, 1.0 / count.worst);
+
+        is_counting.set(CountingFrames::NotCounting);
+    }
+    else {
+        count.count += 1;
+        if time.delta_seconds() < count.worst {
+            count.worst = time.delta_seconds();
+        }
+    }
+}
+
+pub fn dev_console_environment(app: &mut App) -> Environment {
+    app.insert_resource(FrameCount::default());
+    app.init_state::<CountingFrames>();
+    app.add_systems(Update, (count_frames).run_if(in_state(CountingFrames::Counting)));
+
     let mut environment = Environment::default();
 
-    // The register macro allows us to easily add functions to the environment.
     register!(&mut environment => {
         fn echo;
+        fn fps;
+        fn fps_avg;
     });
 
     environment

@@ -4,6 +4,7 @@ mod util;
 mod game;
 mod loading;
 
+use bevy::ecs::schedule::ExecutorKind;
 use bevy::log::LogPlugin;
 use bevy::prelude::*;
 use bevy::window::{PresentMode, WindowMode};
@@ -37,7 +38,10 @@ fn main() {
     let mut a = App::new();
 
     #[cfg(debug_assertions)]
-    a.insert_non_send_resource(dev_console_environment());
+    {
+        let e = dev_console_environment(&mut a);
+        a.insert_non_send_resource(e);
+    }
 
     a.add_plugins((
         // Start capturing logs before the default plugins initiate.
