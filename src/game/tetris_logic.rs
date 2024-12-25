@@ -436,7 +436,7 @@ pub fn tetris_logic_update(
     mut score: ResMut<NextState<Score>>,
     mut logic: ResMut<TetrisLogic>,
     mut board: ResMut<TetrisBoard>,
-    _keyboard: Res<ButtonInput<KeyCode>>,
+    keyboard: Res<ButtonInput<KeyCode>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut ticker: ResMut<Ticker>,
     mut game_over_state: ResMut<NextState<GameOver>>,
@@ -456,11 +456,11 @@ pub fn tetris_logic_update(
         );
     }
 
-    // #[cfg(debug_assertions)]
+    #[cfg(debug_assertions)]
     // if !console.open() {
-    //     logic
-    //         .as_mut()
-    //         .update(board.as_mut(), &keyboard, materials.as_mut());
+    logic
+        .as_mut()
+        .update(board.as_mut(), &keyboard, materials.as_mut());
     // }
 
     #[cfg(not(debug_assertions))]

@@ -85,7 +85,7 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
                         .with_children(|parent| {
                             // text
                             parent.spawn((
-                                Text("Score: 0".to_string()),
+                                TextSpan("Score: 0".to_string()),
                                 TextFont {
                                     font: font.get(),
                                     font_size: 30.0,
@@ -99,7 +99,7 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
                             ));
 
                             parent.spawn((
-                                Text("Difficulty: 1".to_string()),
+                                TextSpan("Difficulty: 1".to_string()),
                                 TextFont {
                                     font: font.get(),
                                     font_size: 30.0,
@@ -178,7 +178,7 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
                         .with_children(|parent| {
                             // text
                             parent.spawn((
-                                Text("Playing".to_string()),
+                                TextSpan("Playing".to_string()),
                                 TextFont {
                                     font: font.get(),
                                     font_size: 30.0,
