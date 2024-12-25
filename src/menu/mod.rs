@@ -2,9 +2,9 @@ use bevy::app::{App, Plugin};
 use bevy::prelude::*;
 use bevy::ui::Display::Flex;
 
-use crate::GameState;
 use crate::loading::GlobalFont;
 use crate::util::despawn_screen;
+use crate::GameState;
 
 #[derive(Component)]
 struct OnMenuScreen;
@@ -13,8 +13,7 @@ pub struct MenuPlugin;
 
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_systems(OnEnter(GameState::Menu), menu_setup)
+        app.add_systems(OnEnter(GameState::Menu), menu_setup)
             .add_systems(Update, (play_button).run_if(in_state(GameState::Menu)))
             .add_systems(OnExit(GameState::Menu), despawn_screen::<OnMenuScreen>);
     }
@@ -28,11 +27,7 @@ const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
 
 fn play_button(
     mut interaction_query: Query<
-        (
-            &Interaction,
-            &mut BackgroundColor,
-            &mut BorderColor,
-        ),
+        (&Interaction, &mut BackgroundColor, &mut BorderColor),
         (Changed<Interaction>, With<Button>, With<PlayButton>),
     >,
     mut game_state: ResMut<NextState<GameState>>,
@@ -56,8 +51,9 @@ fn play_button(
 
 fn menu_setup(mut commands: Commands, font: Res<GlobalFont>) {
     // Root node
-    commands.spawn((NodeBundle {
-            style: Style {
+    commands
+        .spawn((
+            Node {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
                 flex_direction: FlexDirection::Column,
@@ -65,22 +61,34 @@ fn menu_setup(mut commands: Commands, font: Res<GlobalFont>) {
                 align_items: AlignItems::Center,
                 ..default()
             },
-            ..default()
-        }, OnMenuScreen))
+            OnMenuScreen,
+        ))
         .with_children(|parent| {
             // Tetris text
-            parent.spawn((TextBundle::from_section(
-                "Tetris",
-                TextStyle {
+            // parent.spawn((TextBundle::from_section(
+            //     "Tetris",
+            //     TextStyle {
+            //         font: font.get(),
+            //         font_size: 40.0,
+            //         color: Color::BLACK,
+            //     }
+            // )));
+
+            parent.spawn((
+                Text("Tetris".to_string()),
+                TextFont {
                     font: font.get(),
                     font_size: 40.0,
-                    color: Color::BLACK,
-                }
-            )));
+                    ..default()
+                },
+                TextColor(Color::BLACK),
+            ));
 
             // Play button
-            parent.spawn((ButtonBundle {
-                    style: Style {
+            parent
+                .spawn((
+                    Button,
+                    Node {
                         width: Val::Px(150.0),
                         height: Val::Px(65.0),
                         border: UiRect::all(Val::Px(5.0)),
@@ -90,18 +98,19 @@ fn menu_setup(mut commands: Commands, font: Res<GlobalFont>) {
                         align_items: AlignItems::Center,
                         ..default()
                     },
-                    border_color: BorderColor(Color::BLACK),
-                    background_color: NORMAL_BUTTON.into(),
-                    ..default()
-                }, PlayButton))
+                    BorderColor(Color::BLACK),
+                    BackgroundColor(NORMAL_BUTTON.into()),
+                    PlayButton,
+                ))
                 .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "Play",
-                        TextStyle {
+                    parent.spawn((
+                        Text("Play".to_string()),
+                        TextFont {
                             font: font.get(),
                             font_size: 40.0,
-                            color: Color::rgb(0.9, 0.9, 0.9),
+                            ..default()
                         },
+                        TextColor(Color::rgb(0.9, 0.9, 0.9)),
                     ));
                 });
         });

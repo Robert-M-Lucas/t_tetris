@@ -1,5 +1,5 @@
-use std::{env, fs, io};
 use std::path::{Path, PathBuf};
+use std::{env, fs, io};
 
 fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> {
     fs::create_dir_all(&dst)?;

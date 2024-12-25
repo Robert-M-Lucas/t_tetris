@@ -4,13 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = "0.13.2"
-bevy-inspector-egui = "0.24.0"
-bevy_dev_console = { git = "https://github.com/doonv/bevy_dev_console.git", version = "0.1.0" }
-#bevy_dev_console = { git = "https://github.com/robert-M-Lucas/bevy_dev_console.git", version = "0.1.0" }
+bevy = "0.15.0"
+bevy-inspector-egui = "0.28.0"
+#bevy_dev_console = { git = "https://github.com/doonv/bevy_dev_console.git", version = "0.0.0" }
+# bevy_dev_console = { git = "https://github.com/robert-M-Lucas/bevy_dev_console.git", version = "0.1.0" }
 rand = "0.8.5"
 rand_derive2 = "0.1.21"
-log = "0.4.21"
+log = "0.4.22"
 
 [profile.dev]
 opt-level = 0

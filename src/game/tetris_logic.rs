@@ -1,14 +1,14 @@
-use std::cmp::{max, min};
+use crate::game::shapes::{BACK_L_SHAPE, BACK_Z_SHAPE, LINE, L_SHAPE, SQUARE, T_SHAPE, Z_SHAPE};
+use crate::game::tetris_board::{Colors, TetrisBoard};
+use crate::game::{Difficulty, GameOver, InGameState, Score, BOARD_HEIGHT, BOARD_WIDTH};
 use bevy::asset::Assets;
 use bevy::input::ButtonInput;
 use bevy::prelude::*;
 use bevy_dev_console::ui::ConsoleUiState;
+use log::log;
 use rand::random;
 use rand_derive2::RandGen;
-use log::log;
-use crate::game::{BOARD_HEIGHT, BOARD_WIDTH, Difficulty, GameOver, InGameState, Score};
-use crate::game::shapes::{BACK_L_SHAPE, BACK_Z_SHAPE, L_SHAPE, LINE, SQUARE, T_SHAPE, Z_SHAPE};
-use crate::game::tetris_board::{Colors, TetrisBoard};
+use std::cmp::{max, min};
 
 #[derive(Debug, RandGen)]
 enum Tetrominos {
@@ -18,7 +18,7 @@ enum Tetrominos {
     Square,
     ZShape,
     BackZShape,
-    TShape
+    TShape,
 }
 
 impl Tetrominos {
@@ -59,7 +59,7 @@ impl Ticker {
         Ticker {
             last: time.elapsed_seconds(),
             save_point: None,
-            interval
+            interval,
         }
     }
 
@@ -102,9 +102,8 @@ pub struct TetrisLogic {
     current_shape: Option<Tetrominos>,
     current_color: Colors,
     difficulty: usize,
-    score: usize
+    score: usize,
 }
-
 
 impl TetrisLogic {
     pub fn new() -> TetrisLogic {
@@ -115,11 +114,16 @@ impl TetrisLogic {
             current_shape: None,
             current_color: Colors::Red,
             difficulty: 0,
-            score: 0
+            score: 0,
         }
     }
 
-    pub fn update(&mut self, board: &mut TetrisBoard, keyboard: &ButtonInput<KeyCode>, materials: &mut Assets<ColorMaterial>) {
+    pub fn update(
+        &mut self,
+        board: &mut TetrisBoard,
+        keyboard: &ButtonInput<KeyCode>,
+        materials: &mut Assets<ColorMaterial>,
+    ) {
         if self.current_shape.is_some() {
             if keyboard.just_pressed(KeyCode::ArrowDown) {
                 self.down(board, materials);
@@ -150,15 +154,14 @@ impl TetrisLogic {
         score: &mut NextState<Score>,
         ticker: &mut Ticker,
         in_game_state: &mut NextState<InGameState>,
-        game_over_state: &mut NextState<GameOver>
+        game_over_state: &mut NextState<GameOver>,
     ) {
         if self.current_shape.is_none() {
             if !self.spawn(board, materials) {
                 in_game_state.set(InGameState::Paused);
                 game_over_state.set(GameOver::GameOver);
             }
-        }
-        else if !self.down(board, materials) {
+        } else if !self.down(board, materials) {
             let clears = self.check_clear(board, materials);
             let score_a = if clears == 0 {
                 0
@@ -170,7 +173,9 @@ impl TetrisLogic {
             score.set(Score { score: self.score });
 
             self.difficulty += clears as usize;
-            difficulty.set(Difficulty { difficulty: self.difficulty });
+            difficulty.set(Difficulty {
+                difficulty: self.difficulty,
+            });
 
             ticker.set_interval(self.get_interval());
 
@@ -184,7 +189,11 @@ impl TetrisLogic {
     }
 
     //noinspection ALL
-    fn check_clear(&mut self, board: &mut TetrisBoard, materials: &mut Assets<ColorMaterial>) -> u32 {
+    fn check_clear(
+        &mut self,
+        board: &mut TetrisBoard,
+        materials: &mut Assets<ColorMaterial>,
+    ) -> u32 {
         let c_board = board.board();
         let mut found = None;
 
@@ -201,20 +210,18 @@ impl TetrisLogic {
 
         if let Some(found) = found {
             if found != BOARD_HEIGHT - 1 {
-                for y in found+1..BOARD_HEIGHT {
+                for y in found + 1..BOARD_HEIGHT {
                     for x in 0..BOARD_WIDTH {
                         let color = board.board()[x][y];
-                        board.set_cell_colour(x, y-1, color, materials);
+                        board.set_cell_colour(x, y - 1, color, materials);
                     }
                 }
 
                 1 + self.check_clear(board, materials)
-            }
-            else {
+            } else {
                 1
             }
-        }
-        else {
+        } else {
             0
         }
     }
@@ -229,7 +236,7 @@ impl TetrisLogic {
 
         self.current_shape = Some(random());
         self.current_color = self.current_shape.as_ref().unwrap().get_color();
-        self.x = ((BOARD_WIDTH / 2) - (4 / 2) )as i32;
+        self.x = ((BOARD_WIDTH / 2) - (4 / 2)) as i32;
         self.y = (BOARD_HEIGHT - 1) as i32;
         self.rot = 0;
 
@@ -251,8 +258,17 @@ impl TetrisLogic {
                     let true_x = self.x + x as i32;
                     let true_y = self.y - y as i32;
 
-                    if true_x >= 0 && true_y >= 0 && true_x < BOARD_WIDTH as i32 && true_y < BOARD_HEIGHT as i32 {
-                        board.set_cell_colour(true_x as usize, true_y as usize, self.current_color, materials);
+                    if true_x >= 0
+                        && true_y >= 0
+                        && true_x < BOARD_WIDTH as i32
+                        && true_y < BOARD_HEIGHT as i32
+                    {
+                        board.set_cell_colour(
+                            true_x as usize,
+                            true_y as usize,
+                            self.current_color,
+                            materials,
+                        );
                     }
                 }
             }
@@ -268,8 +284,17 @@ impl TetrisLogic {
                     let true_x = self.x + x as i32;
                     let true_y = self.y - y as i32;
 
-                    if true_x >= 0 && true_y >= 0 && true_x < BOARD_WIDTH as i32 && true_y < BOARD_HEIGHT as i32 {
-                        board.set_cell_colour(true_x as usize, true_y as usize, Colors::Empty, materials);
+                    if true_x >= 0
+                        && true_y >= 0
+                        && true_x < BOARD_WIDTH as i32
+                        && true_y < BOARD_HEIGHT as i32
+                    {
+                        board.set_cell_colour(
+                            true_x as usize,
+                            true_y as usize,
+                            Colors::Empty,
+                            materials,
+                        );
                     }
                 }
             }
@@ -285,11 +310,15 @@ impl TetrisLogic {
                     let true_x = self.x + x as i32;
                     let true_y = self.y - y as i32;
 
-                    if true_x < 0 ||
-                        true_y < 0 ||
-                        true_x >= BOARD_WIDTH as i32 ||
-                        true_y >= BOARD_HEIGHT as i32 ||
-                        !matches!(&board.board()[true_x as usize][true_y as usize], Colors::Empty) {
+                    if true_x < 0
+                        || true_y < 0
+                        || true_x >= BOARD_WIDTH as i32
+                        || true_y >= BOARD_HEIGHT as i32
+                        || !matches!(
+                            &board.board()[true_x as usize][true_y as usize],
+                            Colors::Empty
+                        )
+                    {
                         return false;
                     }
                 }
@@ -342,7 +371,11 @@ impl TetrisLogic {
         res
     }
 
-    fn clockwise(&mut self, board: &mut TetrisBoard, materials: &mut Assets<ColorMaterial>) -> bool {
+    fn clockwise(
+        &mut self,
+        board: &mut TetrisBoard,
+        materials: &mut Assets<ColorMaterial>,
+    ) -> bool {
         self.undraw(board, materials);
         self.rot = (self.rot + 1) % 4;
 
@@ -365,7 +398,11 @@ impl TetrisLogic {
         res
     }
 
-    fn anticlockwise(&mut self, board: &mut TetrisBoard, materials: &mut Assets<ColorMaterial>) -> bool {
+    fn anticlockwise(
+        &mut self,
+        board: &mut TetrisBoard,
+        materials: &mut Assets<ColorMaterial>,
+    ) -> bool {
         self.undraw(board, materials);
         self.rot = match self.rot {
             0 => 3,
@@ -408,20 +445,31 @@ pub fn tetris_logic_update(
     mut game_over_state: ResMut<NextState<GameOver>>,
     mut in_game_state: ResMut<NextState<InGameState>>,
     time: Res<Time>,
-    #[cfg(debug_assertions)]
-    console: Res<ConsoleUiState>
+    #[cfg(debug_assertions)] console: Res<ConsoleUiState>,
 ) {
     for _ in 0..ticker.as_mut().ticks(&time) {
-        logic.as_mut().tick(&mut board, &mut materials, &mut difficulty, &mut score, &mut ticker, &mut in_game_state, &mut game_over_state);
+        logic.as_mut().tick(
+            &mut board,
+            &mut materials,
+            &mut difficulty,
+            &mut score,
+            &mut ticker,
+            &mut in_game_state,
+            &mut game_over_state,
+        );
     }
 
     #[cfg(debug_assertions)]
     if !console.open() {
-        logic.as_mut().update(board.as_mut(), &keyboard, materials.as_mut());
+        logic
+            .as_mut()
+            .update(board.as_mut(), &keyboard, materials.as_mut());
     }
 
     #[cfg(not(debug_assertions))]
-    logic.as_mut().update(board.as_mut(), &keyboard, materials.as_mut());
+    logic
+        .as_mut()
+        .update(board.as_mut(), &keyboard, materials.as_mut());
 }
 
 pub fn tetris_logic_shutdown(mut commands: Commands) {

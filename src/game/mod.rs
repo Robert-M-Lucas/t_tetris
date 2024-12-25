@@ -1,21 +1,21 @@
+use crate::game::tetris_logic::{ticker_pause, ticker_resume};
+use crate::game::ui::update_labels;
 use bevy::app::{App, Plugin};
 use bevy::prelude::*;
 use bevy::sprite::Material2d;
 use bevy::window::WindowMode;
 use rand::random;
 use tetris_board::{Colors, TetrisBoard};
-use crate::game::tetris_logic::{ticker_pause, ticker_resume};
-use crate::game::ui::update_labels;
 
 use crate::game::ui_setup::{ui_resize_handler, ui_setup};
-use crate::GameState;
 use crate::util::despawn_screen;
+use crate::GameState;
 
-mod ui_setup;
+mod shapes;
 mod tetris_board;
 mod tetris_logic;
-mod shapes;
 mod ui;
+mod ui_setup;
 
 pub const BOARD_WIDTH: usize = 10;
 pub const BOARD_HEIGHT: usize = 24;
@@ -33,73 +33,80 @@ pub struct GamePlugin;
 pub enum InGameState {
     #[default]
     UnPaused,
-    Paused
+    Paused,
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum GameOver {
     #[default]
     NotOver,
-    GameOver
+    GameOver,
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub struct Difficulty {
-    pub difficulty: usize
+    pub difficulty: usize,
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub struct Score {
-    pub score: usize
+    pub score: usize,
 }
-
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app
-            .init_state::<InGameState>()
+        app.init_state::<InGameState>()
             .init_state::<GameOver>()
             .init_state::<Difficulty>()
             .init_state::<Score>()
             .add_systems(
                 OnEnter(GameState::Game),
-                (ui_setup, tetris_board::tetris_board_setup, tetris_logic::tetris_logic_setup, game_setup)
+                (
+                    ui_setup,
+                    tetris_board::tetris_board_setup,
+                    tetris_logic::tetris_logic_setup,
+                    game_setup,
+                ),
             )
             .add_systems(
                 Update,
-                (ui_resize_handler, tetris_board::cell_resize_handler, pause, update_labels)
-                    .run_if(in_state(GameState::Game))
+                (
+                    ui_resize_handler,
+                    tetris_board::cell_resize_handler,
+                    pause,
+                    update_labels,
+                )
+                    .run_if(in_state(GameState::Game)),
             )
             .add_systems(
                 Update,
                 (pause_menu)
                     .run_if(in_state(GameState::Game))
-                    .run_if(in_state(InGameState::Paused))
+                    .run_if(in_state(InGameState::Paused)),
             )
             .add_systems(
                 Update,
                 (tetris_logic::tetris_logic_update)
                     .run_if(in_state(GameState::Game))
-                    .run_if(in_state(InGameState::UnPaused))
+                    .run_if(in_state(InGameState::UnPaused)),
             )
             .add_systems(
                 OnEnter(InGameState::UnPaused),
-                (ticker_resume)
-                    .run_if(in_state(GameState::Game))
+                (ticker_resume).run_if(in_state(GameState::Game)),
             )
             .add_systems(
                 OnEnter(InGameState::Paused),
-                (ticker_pause)
-                    .run_if(in_state(GameState::Game))
+                (ticker_pause).run_if(in_state(GameState::Game)),
             )
             .add_systems(
                 OnExit(GameState::Game),
-                (despawn_screen::<OnGameScreen>, tetris_board::tetris_board_shutdown, tetris_logic::tetris_logic_shutdown)
+                (
+                    despawn_screen::<OnGameScreen>,
+                    tetris_board::tetris_board_shutdown,
+                    tetris_logic::tetris_logic_shutdown,
+                ),
             )
-            .add_systems(
-                OnEnter(GameState::ReloadGame),
-                (reload_game)
-            );
+            .add_systems(OnEnter(GameState::ReloadGame), (reload_game));
     }
 }
 
@@ -107,8 +114,15 @@ fn reload_game(mut game_state: ResMut<NextState<GameState>>) {
     game_state.set(GameState::Game);
 }
 
-fn pause(keyboard_input: Res<ButtonInput<KeyCode>>, game_over: Res<State<GameOver>>, state: Res<State<InGameState>>, mut next_state: ResMut<NextState<InGameState>>) {
-    if matches!(game_over.as_ref().get(), GameOver::GameOver) { return; }
+fn pause(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    game_over: Res<State<GameOver>>,
+    state: Res<State<InGameState>>,
+    mut next_state: ResMut<NextState<InGameState>>,
+) {
+    if matches!(game_over.as_ref().get(), GameOver::GameOver) {
+        return;
+    }
 
     if keyboard_input.just_pressed(KeyCode::Escape) {
         match state.get() {
@@ -130,14 +144,10 @@ fn game_setup(
     score_state.set(Score::default());
 }
 
-fn pause_menu(
-    keyboard: Res<ButtonInput<KeyCode>>,
-    mut game_state: ResMut<NextState<GameState>>,
-) {
+fn pause_menu(keyboard: Res<ButtonInput<KeyCode>>, mut game_state: ResMut<NextState<GameState>>) {
     if keyboard.pressed(KeyCode::Enter) {
         game_state.set(GameState::Menu);
-    }
-    else if keyboard.pressed(KeyCode::KeyR) {
+    } else if keyboard.pressed(KeyCode::KeyR) {
         game_state.set(GameState::ReloadGame);
     }
 }

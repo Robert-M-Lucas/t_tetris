@@ -1,18 +1,21 @@
-use bevy::prelude::{Color, ColorMaterial, Commands, Component, default, EventReader, Mesh, Query, Rectangle, ResMut, Resource, Transform, Window};
-use bevy::asset::{Assets, Handle};
-use bevy::window::WindowResized;
-use bevy::math::Vec2;
-use std::array;
-use bevy::sprite::MaterialMesh2dBundle;
-use rand::{Rng, thread_rng};
-use rand_derive2::RandGen;
-use crate::game::{BOARD_HEIGHT, BOARD_HEIGHT_F, BOARD_WIDTH, BOARD_WIDTH_F, OnGameScreen};
 use crate::game::ui_setup::get_target_and_sidebar_width;
+use crate::game::{OnGameScreen, BOARD_HEIGHT, BOARD_HEIGHT_F, BOARD_WIDTH, BOARD_WIDTH_F};
+use bevy::asset::{Assets, Handle};
+use bevy::math::Vec2;
+use bevy::prelude::{
+    default, Color, ColorMaterial, Commands, Component, EventReader, Mesh, Query, Rectangle,
+    ResMut, Resource, Transform, Window,
+};
+use bevy::sprite::MaterialMesh2dBundle;
+use bevy::window::WindowResized;
+use rand::{thread_rng, Rng};
+use rand_derive2::RandGen;
+use std::array;
 
 #[derive(Component)]
 pub struct TetrisCell {
     x: usize,
-    y: usize
+    y: usize,
 }
 
 impl TetrisCell {
@@ -27,9 +30,11 @@ impl TetrisCell {
 
 pub fn cell_resize_handler(
     mut resize_events: EventReader<WindowResized>,
-    mut cells: Query<(&mut Transform, &TetrisCell)>
+    mut cells: Query<(&mut Transform, &TetrisCell)>,
 ) {
-    let Some(e) = resize_events.read().last() else { return; };
+    let Some(e) = resize_events.read().last() else {
+        return;
+    };
     let cell_width = get_cell_width(e.width, e.height);
 
     for (mut transform, cell) in cells.iter_mut() {
@@ -49,7 +54,7 @@ fn get_cell_width(width: f32, height: f32) -> f32 {
 fn get_cell_pos(cell_width: f32, x: usize, y: usize) -> Vec2 {
     Vec2::new(
         (x as f32 - (BOARD_WIDTH_F / 2.0)) * cell_width + (cell_width / 2.0),
-        (y as f32 - (BOARD_HEIGHT_F / 2.0)) * cell_width + (cell_width / 2.0)
+        (y as f32 - (BOARD_HEIGHT_F / 2.0)) * cell_width + (cell_width / 2.0),
     )
 }
 
@@ -62,7 +67,7 @@ pub enum Colors {
     Yellow,
     Lime,
     Purple,
-    Red
+    Red,
 }
 
 // impl Colors {
@@ -86,7 +91,7 @@ impl Colors {
             Colors::LightBlue => Color::TEAL,
             Colors::Orange => Color::ORANGE,
             Colors::Yellow => Color::YELLOW,
-            Colors::Purple => Color::PURPLE
+            Colors::Purple => Color::PURPLE,
         }
     }
 }
@@ -94,7 +99,7 @@ impl Colors {
 #[derive(Resource)]
 pub struct TetrisBoard {
     board_materials: [[Handle<ColorMaterial>; BOARD_HEIGHT]; BOARD_WIDTH],
-    board: [[Colors; BOARD_HEIGHT]; BOARD_WIDTH]
+    board: [[Colors; BOARD_HEIGHT]; BOARD_WIDTH],
 }
 
 impl TetrisBoard {
@@ -103,7 +108,7 @@ impl TetrisBoard {
         height: f32,
         mut commands: &mut Commands,
         mut meshes: &mut ResMut<Assets<Mesh>>,
-        mut materials: &mut ResMut<Assets<ColorMaterial>>
+        mut materials: &mut ResMut<Assets<ColorMaterial>>,
     ) -> TetrisBoard {
         let cell_width = get_cell_width(width, height);
 
@@ -115,13 +120,17 @@ impl TetrisBoard {
 
                 let handle = materials.add(Color::BLACK);
 
-                commands.spawn((MaterialMesh2dBundle {
-                    mesh: meshes.add(Rectangle::default()).into(),
-                    material: handle.clone(),
-                    transform: Transform::from_translation(pos.extend(0.0))
-                        .with_scale(Vec2::splat(cell_width).extend(1.)),
-                    ..default()
-                }, OnGameScreen, TetrisCell::new(x, y)));
+                commands.spawn((
+                    MaterialMesh2dBundle {
+                        mesh: meshes.add(Rectangle::default()).into(),
+                        material: handle.clone(),
+                        transform: Transform::from_translation(pos.extend(0.0))
+                            .with_scale(Vec2::splat(cell_width).extend(1.)),
+                        ..default()
+                    },
+                    OnGameScreen,
+                    TetrisCell::new(x, y),
+                ));
 
                 handle
             })
@@ -129,11 +138,23 @@ impl TetrisBoard {
 
         let board = [[Colors::Empty; BOARD_HEIGHT]; BOARD_WIDTH];
 
-        TetrisBoard { board_materials, board }
+        TetrisBoard {
+            board_materials,
+            board,
+        }
     }
 
-    pub fn set_cell_colour(&mut self, x: usize, y: usize, color: Colors, materials: &mut Assets<ColorMaterial>) {
-        materials.get_mut(&self.board_materials[x][y]).unwrap().color = color.get_color();
+    pub fn set_cell_colour(
+        &mut self,
+        x: usize,
+        y: usize,
+        color: Colors,
+        materials: &mut Assets<ColorMaterial>,
+    ) {
+        materials
+            .get_mut(&self.board_materials[x][y])
+            .unwrap()
+            .color = color.get_color();
         self.board[x][y] = color;
     }
 
@@ -149,7 +170,13 @@ pub fn tetris_board_setup(
     window: Query<&Window>,
 ) {
     let window = window.single();
-    let board = TetrisBoard::create(window.width(), window.height(), &mut commands, &mut meshes, &mut materials);
+    let board = TetrisBoard::create(
+        window.width(),
+        window.height(),
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+    );
     commands.insert_resource(board);
 }
 

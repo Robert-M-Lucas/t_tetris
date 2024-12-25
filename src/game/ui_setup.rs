@@ -1,7 +1,7 @@
-use bevy::prelude::*;
-use bevy::window::WindowResized;
 use crate::game::{OnGameScreen, RATIO};
 use crate::loading::GlobalFont;
+use bevy::prelude::*;
+use bevy::window::WindowResized;
 
 #[derive(Component)]
 pub struct Board;
@@ -26,10 +26,12 @@ pub fn get_target_and_sidebar_width(width: f32, height: f32) -> (f32, f32) {
 
 pub fn ui_resize_handler(
     mut resize_events: EventReader<WindowResized>,
-    mut sidebars: Query<&mut Style, (With<SideBar>, Without<Board>)>,
-    mut board: Query<&mut Style, (With<Board>, Without<SideBar>)>
+    mut sidebars: Query<&mut Node, (With<SideBar>, Without<Board>)>,
+    mut board: Query<&mut Node, (With<Board>, Without<SideBar>)>,
 ) {
-    let Some(e) = resize_events.read().last() else { return; };
+    let Some(e) = resize_events.read().last() else {
+        return;
+    };
 
     let (target_width, sidebar_width) = get_target_and_sidebar_width(e.width, e.height);
 
@@ -43,103 +45,96 @@ pub fn ui_resize_handler(
 pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Window>) {
     let window = window.single();
 
-    let (target_width, sidebar_width) = get_target_and_sidebar_width(window.width(), window.height());
+    let (target_width, sidebar_width) =
+        get_target_and_sidebar_width(window.width(), window.height());
 
     // root node
     commands
-        .spawn((NodeBundle {
-            style: Style {
+        .spawn((
+            Node {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
                 justify_content: JustifyContent::SpaceEvenly,
                 align_items: AlignItems::Stretch,
                 ..default()
             },
-            ..default()
-        }, OnGameScreen))
+            OnGameScreen,
+        ))
         .with_children(|parent| {
             // left vertical fill (border)
             parent
-                .spawn((NodeBundle {
-                    style: Style {
+                .spawn((
+                    Node {
                         height: Val::Percent(100.),
                         width: Val::Px(sidebar_width),
                         ..default()
                     },
-                    background_color: Color::rgb(0.65, 0.65, 0.65).into(),
-                    ..default()
-                }, SideBar))
+                    BackgroundColor(Color::srgb(0.65, 0.65, 0.65).into()),
+                    SideBar,
+                ))
                 .with_children(|parent| {
                     // left vertical fill (content)
                     parent
-                        .spawn(NodeBundle {
-                            style: Style {
-                                width: Val::Percent(100.),
-                                align_items: AlignItems::Center,
-                                justify_content: JustifyContent::Center,
-                                flex_direction: FlexDirection::Column,
-                                ..default()
-                            },
+                        .spawn(Node {
+                            width: Val::Percent(100.),
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Center,
+                            flex_direction: FlexDirection::Column,
                             ..default()
                         })
                         .with_children(|parent| {
                             // text
                             parent.spawn((
-                                TextBundle::from_section(
-                                    "Score: 0",
-                                    TextStyle {
-                                        font: font.get(),
-                                        font_size: 30.0,
-                                        ..default()
-                                    },
-                                ),
+                                Text("Score: 0".to_string()),
+                                TextFont {
+                                    font: font.get(),
+                                    font_size: 30.0,
+                                    ..default()
+                                },
                                 // Because this is a distinct label widget and
                                 // not button/list item text, this is necessary
                                 // for accessibility to treat the text accordingly.
-                                Label, ScoreLabel
+                                Label,
+                                ScoreLabel,
                             ));
 
                             parent.spawn((
-                                TextBundle::from_section(
-                                    "Difficulty: 1",
-                                    TextStyle {
-                                        font: font.get(),
-                                        font_size: 30.0,
-                                        ..default()
-                                    },
-                                )
-                                    .with_style(Style {
-                                        margin: UiRect::all(Val::Px(5.)),
-                                        ..default()
-                                    }),
+                                Text("Difficulty: 1".to_string()),
+                                TextFont {
+                                    font: font.get(),
+                                    font_size: 30.0,
+                                    ..default()
+                                },
+                                Node {
+                                    margin: UiRect::all(Val::Px(5.)),
+                                    ..default()
+                                },
                                 // Because this is a distinct label widget and
                                 // not button/list item text, this is necessary
                                 // for accessibility to treat the text accordingly.
-                                Label, DifficultyLabel
+                                Label,
+                                DifficultyLabel,
                             ));
                         });
                 });
 
             // centre
             parent
-                .spawn((NodeBundle {
-                    style: Style {
+                .spawn((
+                    Node {
                         height: Val::Percent(100.),
                         width: Val::Px(target_width),
                         ..default()
                     },
-                    ..default()
-                }, Board))
+                    Board,
+                ))
                 .with_children(|parent| {
                     // left vertical fill (content)
                     parent
-                        .spawn(NodeBundle {
-                            style: Style {
+                        .spawn(Node {
                                 width: Val::Percent(100.),
                                 ..default()
-                            },
-                            ..default()
-                        })
+                            },)
                         .with_children(|parent| {
                             // text
                             // parent.spawn((
@@ -161,66 +156,60 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
 
             // right vertical fill (border)
             parent
-                .spawn((NodeBundle {
-                    style: Style {
+                .spawn((
+                    Node {
                         height: Val::Percent(100.),
                         width: Val::Px(sidebar_width),
                         ..default()
                     },
-                    background_color: Color::rgb(0.65, 0.65, 0.65).into(),
-                    ..default()
-                }, SideBar))
+                    BackgroundColor(Color::srgb(0.65, 0.65, 0.65).into()),
+                    SideBar,
+                ))
                 .with_children(|parent| {
                     // right vertical fill (content)
                     parent
-                        .spawn(NodeBundle {
-                            style: Style {
-                                width: Val::Percent(100.),
-                                align_items: AlignItems::Center,
-                                justify_content: JustifyContent::Center,
-                                flex_direction: FlexDirection::Column,
-                                ..default()
-                            },
+                        .spawn(Node {
+                            width: Val::Percent(100.),
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Center,
+                            flex_direction: FlexDirection::Column,
                             ..default()
                         })
                         .with_children(|parent| {
                             // text
                             parent.spawn((
-                                TextBundle::from_section(
-                                    "Playing",
-                                    TextStyle {
-                                        font: font.get(),
-                                        font_size: 30.0,
-                                        ..default()
-                                    },
-                                )
-                                    .with_style(Style {
-                                        margin: UiRect::all(Val::Px(20.)),
-                                        ..default()
-                                    }),
+                                Text("Playing".to_string()),
+                                TextFont {
+                                    font: font.get(),
+                                    font_size: 30.0,
+                                    ..default()
+                                },
+                                Node {
+                                    margin: UiRect::all(Val::Px(20.)),
+                                    ..default()
+                                },
                                 // Because this is a distinct label widget and
                                 // not button/list item text, this is necessary
                                 // for accessibility to treat the text accordingly.
-                                Label, InfoLabel
+                                Label,
+                                InfoLabel,
                             ));
 
                             parent.spawn((
-                                TextBundle::from_section(
-                                    include_str!("instructions.txt"),
-                                    TextStyle {
-                                        font: font.get(),
-                                        font_size: 30.0,
-                                        ..default()
-                                    },
-                                )
-                                    .with_style(Style {
-                                        margin: UiRect::all(Val::Px(5.)),
-                                        ..default()
-                                    }),
+                                Text(include_str!("instructions.txt").to_string()),
+                                TextFont {
+                                    font: font.get(),
+                                    font_size: 30.0,
+                                    ..default()
+                                },
+                                Node {
+                                    margin: UiRect::all(Val::Px(5.)),
+                                    ..default()
+                                },
                                 // Because this is a distinct label widget and
                                 // not button/list item text, this is necessary
                                 // for accessibility to treat the text accordingly.
-                                Label
+                                Label,
                             ));
                         });
                 });
