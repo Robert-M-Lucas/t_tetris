@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 pub fn update_labels(
     mut score_label: Query<
-        &mut Text,
+        &mut TextSpan,
         (
             With<ScoreLabel>,
             Without<DifficultyLabel>,
@@ -12,7 +12,7 @@ pub fn update_labels(
         ),
     >,
     mut difficulty_label: Query<
-        &mut Text,
+        &mut TextSpan,
         (
             With<DifficultyLabel>,
             Without<ScoreLabel>,
@@ -20,7 +20,7 @@ pub fn update_labels(
         ),
     >,
     mut info_label: Query<
-        &mut Text,
+        &mut TextSpan,
         (
             With<InfoLabel>,
             Without<DifficultyLabel>,
@@ -32,9 +32,8 @@ pub fn update_labels(
     game_over: Res<State<GameOver>>,
     in_game: Res<State<InGameState>>,
 ) {
-    score_label.single_mut().sections[0].value = format!("Score: {}", score.score);
-    difficulty_label.single_mut().sections[0].value =
-        format!("Difficulty: {}", difficulty.difficulty + 1);
+    **score_label.single_mut() = format!("Score: {}", score.score);
+    **difficulty_label.single_mut() = format!("Difficulty: {}", difficulty.difficulty + 1);
 
     let playing_text = if matches!(game_over.get(), GameOver::GameOver) {
         "Game Over"
@@ -47,5 +46,5 @@ pub fn update_labels(
         ""
     };
 
-    info_label.single_mut().sections[0].value = format!("{playing_text}{state_text}");
+    **info_label.single_mut() = format!("{playing_text}{state_text}");
 }

@@ -1,6 +1,5 @@
 use bevy::app::{App, Plugin};
 use bevy::prelude::*;
-use bevy::ui::Display::Flex;
 
 use crate::loading::GlobalFont;
 use crate::util::despawn_screen;
@@ -22,8 +21,8 @@ impl Plugin for MenuPlugin {
 #[derive(Component)]
 struct PlayButton;
 
-const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
-const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
+const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
+const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
 
 fn play_button(
     mut interaction_query: Query<
@@ -110,7 +109,7 @@ fn menu_setup(mut commands: Commands, font: Res<GlobalFont>) {
                             font_size: 40.0,
                             ..default()
                         },
-                        TextColor(Color::rgb(0.9, 0.9, 0.9)),
+                        TextColor(Color::srgb(0.9, 0.9, 0.9)),
                     ));
                 });
         });

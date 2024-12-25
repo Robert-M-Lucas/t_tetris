@@ -1,7 +1,5 @@
 use bevy::app::{App, Plugin};
 use bevy::prelude::*;
-use bevy::ui::Display::Flex;
-use bevy::window::WindowMode;
 
 use crate::util::despawn_screen;
 use crate::GameState;
@@ -47,7 +45,7 @@ fn loading_setup(
     mut font: ResMut<GlobalFont>,
     mut game_state: ResMut<NextState<GameState>>,
 ) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2d::default());
     font.set(asset_server.load("fonts/FiraSans-Bold.ttf"));
     game_state.set(GameState::Menu);
 }

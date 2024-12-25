@@ -4,11 +4,8 @@ use crate::game::{Difficulty, GameOver, InGameState, Score, BOARD_HEIGHT, BOARD_
 use bevy::asset::Assets;
 use bevy::input::ButtonInput;
 use bevy::prelude::*;
-use bevy_dev_console::ui::ConsoleUiState;
-use log::log;
 use rand::random;
 use rand_derive2::RandGen;
-use std::cmp::{max, min};
 
 #[derive(Debug, RandGen)]
 enum Tetrominos {
@@ -57,14 +54,14 @@ pub struct Ticker {
 impl Ticker {
     pub fn new(time: &Time, interval: f32) -> Ticker {
         Ticker {
-            last: time.elapsed_seconds(),
+            last: time.elapsed_secs(),
             save_point: None,
             interval,
         }
     }
 
     pub fn ticks(&mut self, time: &Time) -> usize {
-        let ticks = ((time.elapsed_seconds() - self.last) / self.interval) as usize;
+        let ticks = ((time.elapsed_secs() - self.last) / self.interval) as usize;
 
         self.last += self.interval * ticks as f32;
 
@@ -76,12 +73,12 @@ impl Ticker {
     }
 
     pub fn pause(&mut self, time: &Time) {
-        self.save_point = Some(time.elapsed_seconds());
+        self.save_point = Some(time.elapsed_secs());
     }
 
     pub fn resume(&mut self, time: &Time) {
         if let Some(save_point) = self.save_point {
-            self.last = time.elapsed_seconds() - (save_point - self.last);
+            self.last = time.elapsed_secs() - (save_point - self.last);
         }
     }
 }
@@ -439,13 +436,13 @@ pub fn tetris_logic_update(
     mut score: ResMut<NextState<Score>>,
     mut logic: ResMut<TetrisLogic>,
     mut board: ResMut<TetrisBoard>,
-    keyboard: Res<ButtonInput<KeyCode>>,
+    _keyboard: Res<ButtonInput<KeyCode>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut ticker: ResMut<Ticker>,
     mut game_over_state: ResMut<NextState<GameOver>>,
     mut in_game_state: ResMut<NextState<InGameState>>,
     time: Res<Time>,
-    #[cfg(debug_assertions)] console: Res<ConsoleUiState>,
+    // #[cfg(debug_assertions)] console: Res<ConsoleUiState>,
 ) {
     for _ in 0..ticker.as_mut().ticks(&time) {
         logic.as_mut().tick(
@@ -459,12 +456,12 @@ pub fn tetris_logic_update(
         );
     }
 
-    #[cfg(debug_assertions)]
-    if !console.open() {
-        logic
-            .as_mut()
-            .update(board.as_mut(), &keyboard, materials.as_mut());
-    }
+    // #[cfg(debug_assertions)]
+    // if !console.open() {
+    //     logic
+    //         .as_mut()
+    //         .update(board.as_mut(), &keyboard, materials.as_mut());
+    // }
 
     #[cfg(not(debug_assertions))]
     logic

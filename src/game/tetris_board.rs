@@ -1,15 +1,14 @@
 use crate::game::ui_setup::get_target_and_sidebar_width;
 use crate::game::{OnGameScreen, BOARD_HEIGHT, BOARD_HEIGHT_F, BOARD_WIDTH, BOARD_WIDTH_F};
 use bevy::asset::{Assets, Handle};
+use bevy::color::palettes::css;
 use bevy::math::Vec2;
 use bevy::prelude::{
-    default, Color, ColorMaterial, Commands, Component, EventReader, Mesh, Query, Rectangle,
-    ResMut, Resource, Transform, Window,
+    default, Color, ColorMaterial, Commands, Component, EventReader, Mesh, MeshMaterial2d, Query,
+    Rectangle, ResMut, Resource, Transform, Window,
 };
 use bevy::sprite::MaterialMesh2dBundle;
 use bevy::window::WindowResized;
-use rand::{thread_rng, Rng};
-use rand_derive2::RandGen;
 use std::array;
 
 #[derive(Component)]
@@ -85,13 +84,13 @@ impl Colors {
     fn get_color(&self) -> Color {
         match &self {
             Colors::Empty => Color::BLACK,
-            Colors::Red => Color::RED,
-            Colors::Lime => Color::LIME_GREEN,
-            Colors::Blue => Color::BLUE,
-            Colors::LightBlue => Color::TEAL,
-            Colors::Orange => Color::ORANGE,
-            Colors::Yellow => Color::YELLOW,
-            Colors::Purple => Color::PURPLE,
+            Colors::Red => css::RED.into(),
+            Colors::Lime => css::LIME.into(),
+            Colors::Blue => css::BLUE.into(),
+            Colors::LightBlue => css::TEAL.into(),
+            Colors::Orange => css::ORANGE.into(),
+            Colors::Yellow => css::YELLOW.into(),
+            Colors::Purple => css::PURPLE.into(),
         }
     }
 }
@@ -106,15 +105,15 @@ impl TetrisBoard {
     pub fn create(
         width: f32,
         height: f32,
-        mut commands: &mut Commands,
-        mut meshes: &mut ResMut<Assets<Mesh>>,
-        mut materials: &mut ResMut<Assets<ColorMaterial>>,
+        commands: &mut Commands,
+        meshes: &mut ResMut<Assets<Mesh>>,
+        materials: &mut ResMut<Assets<ColorMaterial>>,
     ) -> TetrisBoard {
         let cell_width = get_cell_width(width, height);
 
         let board_materials = array::from_fn(|x| {
             array::from_fn(|y| {
-                let i = y * BOARD_WIDTH + x;
+                // let i = y * BOARD_WIDTH + x;
 
                 let pos = get_cell_pos(cell_width, x, y);
 
@@ -123,7 +122,7 @@ impl TetrisBoard {
                 commands.spawn((
                     MaterialMesh2dBundle {
                         mesh: meshes.add(Rectangle::default()).into(),
-                        material: handle.clone(),
+                        material: MeshMaterial2d(handle.clone()),
                         transform: Transform::from_translation(pos.extend(0.0))
                             .with_scale(Vec2::splat(cell_width).extend(1.)),
                         ..default()

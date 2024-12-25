@@ -2,10 +2,6 @@ use crate::game::tetris_logic::{ticker_pause, ticker_resume};
 use crate::game::ui::update_labels;
 use bevy::app::{App, Plugin};
 use bevy::prelude::*;
-use bevy::sprite::Material2d;
-use bevy::window::WindowMode;
-use rand::random;
-use tetris_board::{Colors, TetrisBoard};
 
 use crate::game::ui_setup::{ui_resize_handler, ui_setup};
 use crate::util::despawn_screen;
@@ -106,7 +102,7 @@ impl Plugin for GamePlugin {
                     tetris_logic::tetris_logic_shutdown,
                 ),
             )
-            .add_systems(OnEnter(GameState::ReloadGame), (reload_game));
+            .add_systems(OnEnter(GameState::ReloadGame), reload_game);
     }
 }
 

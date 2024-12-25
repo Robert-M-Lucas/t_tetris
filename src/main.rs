@@ -8,7 +8,6 @@ mod util;
 use crate::game::GamePlugin;
 use crate::loading::LoadingPlugin;
 use crate::menu::MenuPlugin;
-use bevy::ecs::schedule::ExecutorKind;
 use bevy::log::LogPlugin;
 use bevy::prelude::*;
 use bevy::window::{PresentMode, WindowMode};

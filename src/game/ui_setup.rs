@@ -132,10 +132,10 @@ pub fn ui_setup(mut commands: Commands, font: Res<GlobalFont>, window: Query<&Wi
                     // left vertical fill (content)
                     parent
                         .spawn(Node {
-                                width: Val::Percent(100.),
-                                ..default()
-                            },)
-                        .with_children(|parent| {
+                            width: Val::Percent(100.),
+                            ..default()
+                        })
+                        .with_children(|_parent| {
                             // text
                             // parent.spawn((
                             //     TextBundle::from_section(
